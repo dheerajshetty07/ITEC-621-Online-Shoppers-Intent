@@ -1,0 +1,217 @@
+---
+title: "ITEC621 Project"
+format: docx
+editor: visual
+echo: true
+---
+
+## Quarto
+
+Quarto enables you to weave together content and executable code into a finished document. To learn more about Quarto see <https://quarto.org>.
+
+## Running Code
+
+load dataset
+
+```{r}
+Shopping <- read.table("online_shoppers_intention.csv", header = TRUE, sep = ",")
+```
+
+4.1 Descriptive statistics of key variables (i.e., means and standard deviations or variances)
+
+```{r}
+
+library(dplyr)
+
+# Convert categorical variables to factors
+Shopping$Month <- as.factor(Shopping$Month)
+Shopping$VisitorType <- as.factor(Shopping$VisitorType)
+Shopping$OperatingSystems <- as.factor(Shopping$OperatingSystems)
+Shopping$Browser <- as.factor(Shopping$Browser)
+Shopping$Region <- as.factor(Shopping$Region)
+Shopping$TrafficType <- as.factor(Shopping$TrafficType)
+
+head(Shopping)
+summary(Shopping)
+
+```
+
+mean and standard dev. for numeric varaibles
+
+```{r}
+library(psych)
+describe(Shopping)
+
+# Mean Product Duration by Revenue 
+tapply(Shopping$ProductRelated_Duration, Shopping$Revenue, mean, na.rm = TRUE)
+tapply(Shopping$ProductRelated_Duration, Shopping$Revenue, sd, na.rm = TRUE)
+
+# Bounce Rates by Revenue 
+tapply(Shopping$BounceRates, Shopping$Revenue, mean, na.rm = TRUE)
+tapply(Shopping$BounceRates, Shopping$Revenue, sd, na.rm = TRUE)
+
+# Exit Rates by Revenue 
+tapply(Shopping$ExitRates, Shopping$Revenue, mean, na.rm = TRUE)
+
+# Page Values by Revenue 
+tapply(Shopping$PageValues, Shopping$Revenue, mean, na.rm = TRUE)
+
+# Special Day Score by Revenue 
+tapply(Shopping$SpecialDay, Shopping$Revenue, mean, na.rm = TRUE)
+```
+
+categorical variables frequency
+
+```{r}
+ #Visitor Type
+table(Shopping$VisitorType)
+table(Shopping$VisitorType, Shopping$Revenue)
+
+# Weekend visits
+table(Shopping$Weekend)
+table(Shopping$Weekend, Shopping$Revenue)
+
+# Month of visit
+table(Shopping$Month)
+table(Shopping$Month, Shopping$Revenue)
+```
+
+4.2 Distribution of the outcome variable (e.g., normal, skewed, Poisson, binary, etc.-BINARY
+
+```{r}
+barplot(table(Shopping$Revenue),
+        main = "Distribution of Purchase Outcome",
+        ylab = "Number of Sessions",
+        names.arg = c("No Purchase", "Purchase"),
+col = c("darkred", "darkgreen"))
+
+```
+
+4.2 Distribution of the outcome variable (e.g., normal, skewed, Poisson, binary, etc.-BINARY
+
+```{r}
+
+#Previous Code for simple heatmap (Victoria)
+
+numeric_vars <- Shopping[, c("ProductRelated_Duration", "BounceRates", "ExitRates", "PageValues", "SpecialDay")]
+
+# Correlation matrix
+cor_matrix <- cor(numeric_vars, use = "complete.obs")
+print(cor_matrix)
+
+# Simple heatmap
+heatmap(cor_matrix, main = "Correlation Heatmap of Numeric Variables")
+
+# ______Select relevant numeric variables______
+numeric_vars <- Shopping[, c("ProductRelated_Duration", "BounceRates", "ExitRates", "PageValues", "SpecialDay")]
+
+# Correlation matrix
+cor_matrix <- cor(numeric_vars, use = "complete.obs")
+print(cor_matrix)
+
+library(pheatmap)
+
+# Simple heatmap
+pheatmap(cor_matrix,
+         main = "Correlation Heatmap of Numeric Variables",
+         fontsize_row = 12,      # Increase row label size
+         fontsize_col = 12,      # Increase column label size
+         display_numbers = TRUE, # Optional: show correlation values
+         clustering_method = "complete",
+         angle_col = 45)
+
+
+```
+
+4.2 Distribution of the outcome variable (e.g., normal, skewed, Poisson, binary, etc.-BINARY
+
+```{r}
+barplot(table(Shopping$Revenue),
+        main = "Distribution of Purchase Outcome",
+        ylab = "Number of Sessions",
+        names.arg = c("No Purchase", "Purchase"),
+col = c("darkred", "darkgreen"))
+
+```
+
+4.2 Distribution of the outcome variable (e.g., normal, skewed, Poisson, binary, etc.-BINARY
+
+```{r}
+barplot(table(Shopping$Revenue),
+        main = "Distribution of Purchase Outcome",
+        ylab = "Number of Sessions",
+        names.arg = c("No Purchase", "Purchase"),
+col = c("darkred", "darkgreen"))
+
+```
+
+4.3 Correlation and co-variation analysis (e.g., correlation analysis, ANOVA, chi-square tests of
+
+independence).
+
+```{r}
+# numeric variables
+Shopping.num <- Shopping[, c("ProductRelated_Duration", "BounceRates", "ExitRates", "PageValues", "SpecialDay")]
+
+# Correlation plots
+Shopping.cor <- cor(Shopping.num)
+library(corrplot)
+corrplot(Shopping.cor,
+order= "hclust",
+method= "number")
+
+corrplot(Shopping.cor,
+order= "hclust",
+method= "ellipse")
+
+```
+
+Chi-square Test (cat v. cat)
+
+```{r}
+# Visitor Type vs Revenue
+table_vt <- table(Shopping$VisitorType, Shopping$Revenue)
+chisq.test(table_vt)
+
+# Weekend vs Revenue
+table_weekend <- table(Shopping$Weekend, Shopping$Revenue)
+chisq.test(table_weekend)
+
+# Month vs Revenue
+table_month <- table(Shopping$Month, Shopping$Revenue)
+chisq.test(table_month)
+
+```
+
+ANOVA Test (num vs. cat)-product duration differ by Revenue?
+
+```{r}
+
+anova_result <- aov(ProductRelated_Duration ~ Revenue, data = Shopping)
+summary(anova_result)
+
+```
+
+5.2 Initial Logistic Regression Model
+
+```{r}
+
+# Fit the model
+
+logit_model <- glm(Revenue ~ ProductRelated_Duration + BounceRates + ExitRates + VisitorType + Weekend + Month, 
+                   family = binomial, data = Shopping)
+
+# Summary of results
+summary(logit_model)
+```
+
+Residual Plots
+
+```{r}
+
+# Residual plots for fit assessment
+
+par(mfrow = c(2, 2))  # Set up a 2x2 plot grid
+
+plot(logit_model)
+```
