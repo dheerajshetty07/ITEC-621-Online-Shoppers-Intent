@@ -205,6 +205,7 @@ logit_model <- glm(Revenue ~ ProductRelated_Duration + BounceRates + ExitRates +
 summary(logit_model)
 ```
 
+```{r}
 # Multicollinearity Test (VIF)
 
 vif(logit_model)
@@ -228,3 +229,4 @@ plot(hatvalues(logit_model), residuals(logit_model, type = "pearson"),
      xlab = "Leverage", ylab = "Pearson Residuals", 
      main = "Residuals vs Leverage")
 abline(h = 0, col = "red", lty = 2)
+```
