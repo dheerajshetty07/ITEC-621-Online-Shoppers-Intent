@@ -205,13 +205,26 @@ logit_model <- glm(Revenue ~ ProductRelated_Duration + BounceRates + ExitRates +
 summary(logit_model)
 ```
 
-Residual Plots
+# Multicollinearity Test (VIF)
 
-```{r}
+vif(logit_model)
 
-# Residual plots for fit assessment
+# Residual Plots 
 
-par(mfrow = c(2, 2))  # Set up a 2x2 plot grid
+# Residuals vs. Fitted
+plot(fitted(logit_model), residuals(logit_model, type = "pearson"), 
+     xlab = "Predicted Values", ylab = "Pearson Residuals", 
+     main = "Residuals vs Fitted")
+abline(h = 0, col = "red", lty = 2)
 
-plot(logit_model)
-```
+# Scale-Location
+plot(fitted(logit_model), sqrt(abs(residuals(logit_model, type = "pearson"))), 
+     xlab = "Predicted Values", ylab = "Sqrt(|Pearson Residuals|)", 
+     main = "Scale-Location")
+abline(h = 0, col = "red", lty = 2)
+
+# Residuals vs. Leverage
+plot(hatvalues(logit_model), residuals(logit_model, type = "pearson"), 
+     xlab = "Leverage", ylab = "Pearson Residuals", 
+     main = "Residuals vs Leverage")
+abline(h = 0, col = "red", lty = 2)
