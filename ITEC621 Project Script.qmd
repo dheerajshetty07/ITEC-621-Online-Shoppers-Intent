@@ -231,25 +231,26 @@ plot(hatvalues(logit_model), residuals(logit_model, type = "pearson"),
 abline(h = 0, col = "red", lty = 2)
 
 Balance the data
-
 ```{r}
-set.seed(1) # Random seed for reproducibility
+set.seed(1) # Random seed
 
-# Subset positive outcomes (purchases)
-Shopping.1 <- subset(Shopping, Revenue == TRUE)
-cat("Positive observations (Revenue = TRUE) = ", nrow(Shopping.1), "\n")
+# Separate the positive and negative classes
+Shopping.1 <- subset(Shopping, Revenue == TRUE)  # Purchases
+Shopping.0 <- subset(Shopping, Revenue == FALSE) # Non-purchases
 
-# Subset negative outcomes (no purchases)
-Shopping.0 <- subset(Shopping, Revenue == FALSE)
-cat("Negative observations (Revenue = FALSE) = ", nrow(Shopping.0), "\n")
+cat("Positive observations = ", nrow(Shopping.1), "\n")
+cat("Negative observations = ", nrow(Shopping.0), "\n")
 
-# Subsample the negatives to match the size of positives
-Shopping.0.bal <- Shopping.0[sample(nrow(Shopping.0), nrow(Shopping.1)), ]
-cat("Negative balanced observations = ", nrow(Shopping.0.bal), "\n")
+# Oversample positives to match the number of negatives
+Shopping.1.oversampled <- Shopping.1[sample(nrow(Shopping.1), size = nrow(Shopping.0), replace = TRUE), ]
+cat("Oversampled positive observations = ", nrow(Shopping.1.oversampled), "\n")
 
-# Row bind positives and balanced negatives
-Shopping.bal <- rbind(Shopping.1, Shopping.0.bal)
+# Combine oversampled positives with original negatives
+Shopping.bal <- rbind(Shopping.0, Shopping.1.oversampled)
 cat("Total balanced observations = ", nrow(Shopping.bal), "\n")
+
+# Check new class balance
+table(Shopping.bal$Revenue)
 
 ```
 
