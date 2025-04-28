@@ -229,4 +229,38 @@ plot(hatvalues(logit_model), residuals(logit_model, type = "pearson"),
      xlab = "Leverage", ylab = "Pearson Residuals", 
      main = "Residuals vs Leverage")
 abline(h = 0, col = "red", lty = 2)
+
+Balance the data
+
+```{r}
+set.seed(1) # Random seed for reproducibility
+
+# Subset positive outcomes (purchases)
+Shopping.1 <- subset(Shopping, Revenue == TRUE)
+cat("Positive observations (Revenue = TRUE) = ", nrow(Shopping.1), "\n")
+
+# Subset negative outcomes (no purchases)
+Shopping.0 <- subset(Shopping, Revenue == FALSE)
+cat("Negative observations (Revenue = FALSE) = ", nrow(Shopping.0), "\n")
+
+# Subsample the negatives to match the size of positives
+Shopping.0.bal <- Shopping.0[sample(nrow(Shopping.0), nrow(Shopping.1)), ]
+cat("Negative balanced observations = ", nrow(Shopping.0.bal), "\n")
+
+# Row bind positives and balanced negatives
+Shopping.bal <- rbind(Shopping.1, Shopping.0.bal)
+cat("Total balanced observations = ", nrow(Shopping.bal), "\n")
+
+```
+
+Logit model with balanced data
+
+```{r}
+logit_model_bal <- glm(Revenue ~ ProductRelated_Duration + BounceRates + ExitRates + VisitorType + Weekend + Month, 
+                   family = binomial, data = Shopping.bal)
+
+# Summary of results
+summary(logit_model_bal)
+```
+
 ```
