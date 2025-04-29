@@ -203,32 +203,13 @@ logit_model <- glm(Revenue ~ ProductRelated_Duration + BounceRates + ExitRates +
 
 # Summary of results
 summary(logit_model)
-```
 
-```{r}
 # Multicollinearity Test (VIF)
 
+library(car)
 vif(logit_model)
 
-# Residual Plots 
-
-# Residuals vs. Fitted
-plot(fitted(logit_model), residuals(logit_model, type = "pearson"), 
-     xlab = "Predicted Values", ylab = "Pearson Residuals", 
-     main = "Residuals vs Fitted")
-abline(h = 0, col = "red", lty = 2)
-
-# Scale-Location
-plot(fitted(logit_model), sqrt(abs(residuals(logit_model, type = "pearson"))), 
-     xlab = "Predicted Values", ylab = "Sqrt(|Pearson Residuals|)", 
-     main = "Scale-Location")
-abline(h = 0, col = "red", lty = 2)
-
-# Residuals vs. Leverage
-plot(hatvalues(logit_model), residuals(logit_model, type = "pearson"), 
-     xlab = "Leverage", ylab = "Pearson Residuals", 
-     main = "Residuals vs Leverage")
-abline(h = 0, col = "red", lty = 2)
+```
 
 Balance the data
 ```{r}
@@ -262,6 +243,8 @@ logit_model_bal <- glm(Revenue ~ ProductRelated_Duration + BounceRates + ExitRat
 
 # Summary of results
 summary(logit_model_bal)
-```
+
+# Multicollinearity Check (again) for balanced data
+vif(logit_model_bal)
 
 ```
