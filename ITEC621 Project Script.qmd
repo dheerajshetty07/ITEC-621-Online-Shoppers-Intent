@@ -256,11 +256,12 @@ LASSO Logistic Regression Model
 ```{r}
 library(glmnet)
 
-x <- model.matrix(Revenue ~ ., data = Shopping.bal)[, -1]
+x <- model.matrix(Revenue ~ ProductRelated_Duration + BounceRates + ExitRates + 
+                    VisitorType + Weekend + Month, data = Shopping.bal)[, -1]
 y <- Shopping.bal$Revenue
 
 lasso_model1 <- glmnet(x, y, alpha = 1, family = "binomial")
-plot(lasso_model1, main = "LASSO Coefficients Path - Spec 1")
+plot(lasso_model1, main = "LASSO Coefficient Path - Spec 1")
 
 ```
 
@@ -269,26 +270,15 @@ plot(lasso_model1, main = "LASSO Coefficients Path - Spec 1")
 ```{r}
 set.seed(1)
 lasso_cv2 <- cv.glmnet(x, y, alpha = 1, family = "binomial")
-
-plot(lasso_cv2, main = "LASSO CV Error")
+plot(lasso_cv2, main = "LASSO CV Error - Spec 2")
 
 lasso_lambda2 <- lasso_cv2$lambda.min
 lasso_coef2 <- coef(lasso_cv2, s = lasso_lambda2)
-```
 
-Lasso Coefficients Listed at the Optimal Lambda
-
-```{r}
-lasso_coef2 <- coef(lasso_cv2, s = lasso_lambda2)
-
-lasso_coef_matrix <- round(as.matrix(lasso_coef2), 4)
-
-lasso_coef_df <- data.frame(Variable = rownames(lasso_coef_matrix),
-                            Coefficient = lasso_coef_matrix[,1])
-
-
-library(knitr)
-kable(lasso_coef_df, caption = "LASSO Coefficients at Optimal Lambda")
+# Summary table for best lambda
+round(cbind("Best Lambda" = lasso_lambda2,
+            "Best Log Lambda" = log(lasso_lambda2),
+            "Best 10FCV" = min(lasso_cv2$cvm)), 5)
 
 ```
 
@@ -308,3 +298,4 @@ lasso.results <- round(
 lasso.results
 
 ```
+
