@@ -270,7 +270,7 @@ plot(lasso_model1, main = "LASSO Coefficient Path - Spec 1")
 ```{r}
 set.seed(1)
 lasso_cv2 <- cv.glmnet(x, y, alpha = 1, family = "binomial")
-plot(lasso_cv2, main = "LASSO CV Error - Spec 2")
+plot(lasso_cv2)
 
 lasso_lambda2 <- lasso_cv2$lambda.min
 lasso_coef2 <- coef(lasso_cv2, s = lasso_lambda2)
