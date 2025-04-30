@@ -249,33 +249,55 @@ vif(logit_model_bal)
 
 ```
 
-LASSO Logistic Regression Model
+LASSO Model Unbalanced Specification, Cross Validation, and Optimal Lambda/Deviance Extraction
 
-(Creating the x predictor matrix and y outcome vector)
+library(glmnet)
+
+x1 <- model.matrix(Revenue ~ ProductRelated_Duration + BounceRates + ExitRates + 
+                   VisitorType + Weekend + Month, data = Shopping)[, -1]
+y1 <- Shopping$Revenue
+
+# Fit LASSO model
+lasso_model1 <- glmnet(x1, y1, alpha = 1, family = "binomial")
+plot(lasso_model1, main = "LASSO Coefficient Path - Spec 1")
+
+# Cross-validation
+set.seed(1)
+lasso_cv1 <- cv.glmnet(x1, y1, alpha = 1, family = "binomial")
+plot(lasso_cv1)
+
+# Extract optimal lambda and deviance
+lasso_lambda1 <- lasso_cv1$lambda.min
+lasso_coef1 <- coef(lasso_cv1, s = lasso_lambda1)
+
+round(cbind("Best Lambda" = lasso_lambda1,
+            "Best Log Lambda" = log(lasso_lambda1),
+            "Best 10FCV" = min(lasso_cv1$cvm)), 5)
+```
+
+LASSO Model Balanced Specification, Cross Validation, and Optimal Lambda/Deviance Extraction
 
 ```{r}
 library(glmnet)
 
-x <- model.matrix(Revenue ~ ProductRelated_Duration + BounceRates + ExitRates + 
-                    VisitorType + Weekend + Month, data = Shopping.bal)[, -1]
-y <- Shopping.bal$Revenue
+# Create predictor matrix (x2) and outcome vector (y2) from balanced dataset
+x2 <- model.matrix(Revenue ~ ProductRelated_Duration + BounceRates + ExitRates +
+                   VisitorType + Weekend + Month, data = Shopping.bal)[, -1]
+y2 <- Shopping.bal$Revenue
 
-lasso_model1 <- glmnet(x, y, alpha = 1, family = "binomial")
-plot(lasso_model1, main = "LASSO Coefficient Path - Spec 1")
+# Fit LASSO model
+lasso_model2 <- glmnet(x2, y2, alpha = 1, family = "binomial")
+plot(lasso_model2, main = "LASSO Coefficient Path - Spec 2 (Balanced)")
 
-```
-
-(CV Error Plot)
-
-```{r}
+# Cross-validation
 set.seed(1)
-lasso_cv2 <- cv.glmnet(x, y, alpha = 1, family = "binomial")
-plot(lasso_cv2)
+lasso_cv2 <- cv.glmnet(x2, y2, alpha = 1, family = "binomial")
+plot(lasso_cv2, main = "LASSO CV Error Plot - Spec 2 (Balanced)")
 
+# Extract optimal lambda and deviance
 lasso_lambda2 <- lasso_cv2$lambda.min
 lasso_coef2 <- coef(lasso_cv2, s = lasso_lambda2)
 
-# Summary table for best lambda
 round(cbind("Best Lambda" = lasso_lambda2,
             "Best Log Lambda" = log(lasso_lambda2),
             "Best 10FCV" = min(lasso_cv2$cvm)), 5)
@@ -285,17 +307,27 @@ round(cbind("Best Lambda" = lasso_lambda2,
 List Results
 
 ```{r}
-lasso.best.lambda <- lasso_cv2$lambda.min
-min.cv.lasso <- min(lasso_cv2$cvm)
+# For Spec 1 (Unbalanced)
+lasso_lambda1 <- lasso_cv1$lambda.min
+min_cv1 <- min(lasso_cv1$cvm)
+
+# For Spec 2 (Balanced)
+lasso_lambda2 <- lasso_cv2$lambda.min
+min_cv2 <- min(lasso_cv2$cvm)
 
 lasso.results <- round(
-  cbind("Best Lambda" = lasso.best.lambda,
-        "Best Log Lambda" = log(lasso.best.lambda),
-        "Best 10FCV" = min.cv.lasso),
-  digits = 5
+  rbind(
+    "Spec 1: Unbalanced" = c("Best Lambda" = lasso_lambda1,
+                             "Best Log Lambda" = log(lasso_lambda1),
+                             "Best 10FCV" = min_cv1),
+    "Spec 2: Balanced"   = c("Best Lambda" = lasso_lambda2,
+                             "Best Log Lambda" = log(lasso_lambda2),
+                             "Best 10FCV" = min_cv2)
+  ), 5
 )
 
 lasso.results
+
 
 ```
 
