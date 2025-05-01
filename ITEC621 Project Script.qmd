@@ -249,7 +249,7 @@ vif(logit_model_bal)
 
 ```
 
-LASSO Model Unbalanced Specification, Cross Validation, and Optimal Lambda/Deviance Extraction
+5.5 LASSO Model Unbalanced Specification, Cross Validation, and Optimal Lambda/Deviance Extraction
 
 ```{r}
 
@@ -420,7 +420,7 @@ importance(rf.bal, type = 2)
 ```
 
 
-10FCV For Logit, LASSO ,Random Forest, and Bagging models
+5.6 - 10FCV For Logit, LASSO ,Random Forest, and Bagging models
 
 ```{r}
 
