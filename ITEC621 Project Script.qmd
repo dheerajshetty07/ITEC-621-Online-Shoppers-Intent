@@ -440,4 +440,34 @@ tree_error_rates <- data.frame(
 
 # Display the table
 tree_error_rates
+
+#10FCV For Logit and LASSO models, OOB Error for Random Forest and Bagging models
 ```
+{r}
+# Extract 10FCV errors from all models
+lasso_cv_error1 <- min(lasso_cv1$cvm)  # LASSO Spec 1 (Unbalanced)
+lasso_cv_error2 <- min(lasso_cv2$cvm)  # LASSO Spec 2 (Balanced)
+logit_cv_error1 <- cv_logit1$delta[2]  # Logit Spec 1 (Unbalanced)
+logit_cv_error2 <- cv_logit2$delta[2]  # Logit Spec 2 (Balanced)
+
+# Tree model error rates (OOB error)
+bag_error1 <- round(bag.unbal$err.rate[nrow(bag.unbal$err.rate), "OOB"], 4)
+bag_error2 <- round(bag.bal$err.rate[nrow(bag.bal$err.rate), "OOB"], 4)
+rf_error1  <- round(rf.unbal$err.rate[nrow(rf.unbal$err.rate), "OOB"], 4)
+rf_error2  <- round(rf.bal$err.rate[nrow(rf.bal$err.rate), "OOB"], 4)
+
+# Combine into one summary data frame
+model_comparison <- data.frame(
+  Model = c("Logit Spec 1 (Unbalanced)", "Logit Spec 2 (Balanced)",
+            "LASSO Spec 1 (Unbalanced)", "LASSO Spec 2 (Balanced)",
+            "Bagging - Unbalanced", "Bagging - Balanced",
+            "Random Forest - Unbalanced", "Random Forest - Balanced"),
+  ErrorRate = round(c(logit_cv_error1, logit_cv_error2,
+                      lasso_cv_error1, lasso_cv_error2,
+                      bag_error1, bag_error2,
+                      rf_error1, rf_error2), 5)
+)
+
+# Display results
+model_comparison
+
