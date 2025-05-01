@@ -333,3 +333,111 @@ lasso.results
 
 ```
 
+
+
+
+Bagging and Random Forest
+```{r}
+# Set seed and RNG setting
+RNGkind(sample.kind = "default")
+set.seed(1)
+
+# Load library
+library(randomForest)
+
+# Ensure binary outcome is a factor with labels
+Shopping$Revenue <- factor(Shopping$Revenue, levels = c(FALSE, TRUE), labels = c("No", "Yes"))
+Shopping.bal$Revenue <- factor(Shopping.bal$Revenue, levels = c(FALSE, TRUE), labels = c("No", "Yes"))
+
+# Define modeling formula
+model_formula <- Revenue ~ ProductRelated_Duration + BounceRates + ExitRates + 
+                              VisitorType + Weekend + Month
+
+# Create NA-safe subsets for modeling
+Shopping.clean <- na.omit(Shopping[, all.vars(model_formula)])
+Shopping.bal.clean <- na.omit(Shopping.bal[, all.vars(model_formula)])
+
+# -------------------------------
+# 1. Bagging (Unbalanced, mtry = 6)
+# -------------------------------
+bag.unbal <- randomForest(model_formula,
+                          data = Shopping.clean,  
+                          mtry = 6,  
+                          importance = TRUE)
+
+print(bag.unbal)
+cat("\nClassification Error Rate (Bagging - Unbalanced) =",
+    bag.unbal$err.rate[nrow(bag.unbal$err.rate), "OOB"])
+
+varImpPlot(bag.unbal, type = 2)
+importance(bag.unbal, type = 2)
+
+# -------------------------------
+# 2. Bagging (Balanced, mtry = 6)
+# -------------------------------
+bag.bal <- randomForest(model_formula,
+                        data = Shopping.bal.clean,  
+                        mtry = 6,  
+                        importance = TRUE)
+
+print(bag.bal)
+cat("\nClassification Error Rate (Bagging - Balanced) =",
+    bag.bal$err.rate[nrow(bag.bal$err.rate), "OOB"])
+
+varImpPlot(bag.bal, type = 2)
+importance(bag.bal, type = 2)
+
+# -------------------------------
+# 3. Random Forest (Unbalanced, mtry = 3)
+# -------------------------------
+rf.unbal <- randomForest(model_formula,
+                         data = Shopping.clean,  
+                         mtry = 3,  
+                         importance = TRUE)
+
+print(rf.unbal)
+cat("\nClassification Error Rate (Random Forest - Unbalanced) =",
+    rf.unbal$err.rate[nrow(rf.unbal$err.rate), "OOB"])
+
+varImpPlot(rf.unbal, type = 2)
+importance(rf.unbal, type = 2)
+
+# -------------------------------
+# 4. Random Forest (Balanced, mtry = 3)
+# -------------------------------
+rf.bal <- randomForest(model_formula,
+                       data = Shopping.bal.clean,  
+                       mtry = 3,  
+                       importance = TRUE)
+
+print(rf.bal)
+cat("\nClassification Error Rate (Random Forest - Balanced) =",
+    rf.bal$err.rate[nrow(rf.bal$err.rate), "OOB"])
+
+varImpPlot(rf.bal, type = 2)
+importance(rf.bal, type = 2)
+
+```
+
+
+
+```{r}
+# Create classification error rate table
+
+tree_error_rates <- data.frame(
+  Model = c("Bagging - Unbalanced",
+            "Bagging - Balanced",
+            "Random Forest - Unbalanced",
+            "Random Forest - Balanced"),
+  
+  ErrorRate = c(
+    round(bag.unbal$err.rate[nrow(bag.unbal$err.rate), "OOB"], 4),
+    round(bag.bal$err.rate[nrow(bag.bal$err.rate), "OOB"], 4),
+    round(rf.unbal$err.rate[nrow(rf.unbal$err.rate), "OOB"], 4),
+    round(rf.bal$err.rate[nrow(rf.bal$err.rate), "OOB"], 4)
+  )
+)
+
+# Display the table
+tree_error_rates
+```
