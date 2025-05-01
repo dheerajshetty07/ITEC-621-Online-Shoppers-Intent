@@ -420,8 +420,10 @@ importance(rf.bal, type = 2)
 ```
 
 
-#10FCV For Logit, LASSO ,Random Forest, and Bagging models
-```
+10FCV For Logit, LASSO ,Random Forest, and Bagging models
+
+```{r}
+
 # Load caret and randomForest
 library(caret)
 library(randomForest)
@@ -453,7 +455,8 @@ rf_cv_bal <- train(model_formula, data = Shopping.bal.clean,
                    method = "rf", trControl = ctrl, tuneGrid = data.frame(mtry = 3))
 
 ```
-{r}
+```{r}
+
 # Extract and convert accuracy to error rate
 bag_cv_unbal_error <- 1 - max(bag_cv_unbal$results$Accuracy)
 bag_cv_bal_error   <- 1 - max(bag_cv_bal$results$Accuracy)
@@ -462,7 +465,8 @@ rf_cv_bal_error    <- 1 - max(rf_cv_bal$results$Accuracy)
 
 ```
 
-{r}
+```{r}
+
 library(boot)
 
 # Logistic Model – Spec 1: Unbalanced
@@ -475,7 +479,8 @@ cv_logit2 <- cv.glm(data = Shopping.bal, glmfit = logit_model_bal, K = 10)
 
 ```
 
-{r}
+```{r}
+
 model_comparison <- data.frame(
   Model = c("Logit Spec 1 (Unbalanced)", "Logit Spec 2 (Balanced)",
             "LASSO Spec 1 (Unbalanced)", "LASSO Spec 2 (Balanced)",
