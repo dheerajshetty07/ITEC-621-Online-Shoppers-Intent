@@ -420,54 +420,74 @@ importance(rf.bal, type = 2)
 ```
 
 
+#10FCV For Logit, LASSO ,Random Forest, and Bagging models
+```
+# Load caret and randomForest
+library(caret)
+library(randomForest)
 
-```{r}
-# Create classification error rate table
+# Define formula (already established)
+model_formula <- Revenue ~ ProductRelated_Duration + BounceRates + ExitRates + VisitorType + Weekend + Month
 
-tree_error_rates <- data.frame(
-  Model = c("Bagging - Unbalanced",
-            "Bagging - Balanced",
-            "Random Forest - Unbalanced",
-            "Random Forest - Balanced"),
-  
-  ErrorRate = c(
-    round(bag.unbal$err.rate[nrow(bag.unbal$err.rate), "OOB"], 4),
-    round(bag.bal$err.rate[nrow(bag.bal$err.rate), "OOB"], 4),
-    round(rf.unbal$err.rate[nrow(rf.unbal$err.rate), "OOB"], 4),
-    round(rf.bal$err.rate[nrow(rf.bal$err.rate), "OOB"], 4)
-  )
-)
+# Set control for 10-fold cross-validation
+ctrl <- trainControl(method = "cv", number = 10)
 
-# Display the table
-tree_error_rates
+# 1. Bagging - Unbalanced
+set.seed(1)
+bag_cv_unbal <- train(model_formula, data = Shopping.clean,
+                      method = "treebag", trControl = ctrl)
 
-#10FCV For Logit and LASSO models, OOB Error for Random Forest and Bagging models
+# 2. Bagging - Balanced
+set.seed(1)
+bag_cv_bal <- train(model_formula, data = Shopping.bal.clean,
+                    method = "treebag", trControl = ctrl)
+
+# 3. Random Forest - Unbalanced
+set.seed(1)
+rf_cv_unbal <- train(model_formula, data = Shopping.clean,
+                     method = "rf", trControl = ctrl, tuneGrid = data.frame(mtry = 3))
+
+# 4. Random Forest - Balanced
+set.seed(1)
+rf_cv_bal <- train(model_formula, data = Shopping.bal.clean,
+                   method = "rf", trControl = ctrl, tuneGrid = data.frame(mtry = 3))
+
 ```
 {r}
-# Extract 10FCV errors from all models
-lasso_cv_error1 <- min(lasso_cv1$cvm)  # LASSO Spec 1 (Unbalanced)
-lasso_cv_error2 <- min(lasso_cv2$cvm)  # LASSO Spec 2 (Balanced)
-logit_cv_error1 <- cv_logit1$delta[2]  # Logit Spec 1 (Unbalanced)
-logit_cv_error2 <- cv_logit2$delta[2]  # Logit Spec 2 (Balanced)
+# Extract and convert accuracy to error rate
+bag_cv_unbal_error <- 1 - max(bag_cv_unbal$results$Accuracy)
+bag_cv_bal_error   <- 1 - max(bag_cv_bal$results$Accuracy)
+rf_cv_unbal_error  <- 1 - max(rf_cv_unbal$results$Accuracy)
+rf_cv_bal_error    <- 1 - max(rf_cv_bal$results$Accuracy)
 
-# Tree model error rates (OOB error)
-bag_error1 <- round(bag.unbal$err.rate[nrow(bag.unbal$err.rate), "OOB"], 4)
-bag_error2 <- round(bag.bal$err.rate[nrow(bag.bal$err.rate), "OOB"], 4)
-rf_error1  <- round(rf.unbal$err.rate[nrow(rf.unbal$err.rate), "OOB"], 4)
-rf_error2  <- round(rf.bal$err.rate[nrow(rf.bal$err.rate), "OOB"], 4)
+```
 
-# Combine into one summary data frame
+{r}
+library(boot)
+
+# Logistic Model – Spec 1: Unbalanced
+set.seed(1)
+cv_logit1 <- cv.glm(data = Shopping, glmfit = logit_model, K = 10)
+
+# Logistic Model – Spec 2: Balanced
+set.seed(1)
+cv_logit2 <- cv.glm(data = Shopping.bal, glmfit = logit_model_bal, K = 10)
+
+```
+
+{r}
 model_comparison <- data.frame(
   Model = c("Logit Spec 1 (Unbalanced)", "Logit Spec 2 (Balanced)",
             "LASSO Spec 1 (Unbalanced)", "LASSO Spec 2 (Balanced)",
             "Bagging - Unbalanced", "Bagging - Balanced",
             "Random Forest - Unbalanced", "Random Forest - Balanced"),
-  ErrorRate = round(c(logit_cv_error1, logit_cv_error2,
-                      lasso_cv_error1, lasso_cv_error2,
-                      bag_error1, bag_error2,
-                      rf_error1, rf_error2), 5)
+  `10FCV Error` = round(c(logit_cv_error1, logit_cv_error2,
+                          lasso_cv_error1, lasso_cv_error2,
+                          bag_cv_unbal_error, bag_cv_bal_error,
+                          rf_cv_unbal_error, rf_cv_bal_error), 5)
 )
 
-# Display results
+# View
 model_comparison
 
+```
