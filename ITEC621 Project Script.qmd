@@ -249,8 +249,9 @@ vif(logit_model_bal)
 
 ```
 
-```{r}
 LASSO Model Unbalanced Specification, Cross Validation, and Optimal Lambda/Deviance Extraction
+
+```{r}
 
 library(glmnet)
 
